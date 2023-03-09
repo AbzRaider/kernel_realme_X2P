@@ -6,12 +6,10 @@ SECONDS=0 # builtin bash timer
 ZIPNAME="Azrael-X2PRO-$(date '+%Y%m%d-%H%M').zip"
 TC_DIR="$HOME/clang-proton"
 DEFCONFIG="RMX1931_defconfig"
-
-export PATH="$TC_DIR/bin:$PATH"
-
-if ! [ -d "$TC_DIR" ]; then
-	echo "clang-proton not found! Cloning to $TC_DIR..."
-	if ! git clone --depth=1 https://gitlab.com/LeCmnGend/proton-clang.git "$TC_DIR"; then
+export PATH="${PWD}/clang/bin:${PATH}" \
+export LC_ALL=C && export USE_CCACHE=1
+ccache -M 100G
+        if ! git clone --depth=1 https://gitlab.com/LeCmnGend/proton-clang.git clang ; then
 		echo "Cloning failed! Aborting..."
 		exit 1
 	fi
@@ -31,7 +29,7 @@ mkdir -p out
 make O=out ARCH=arm64 $DEFCONFIG
 
 echo -e "\nStarting compilation...\n"
-make -j$(nproc --all) O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- CONFIG_NO_ERROR_ON_MISMATCH=y 2>&1 | tee error.log - Image.gz dtbo.img
+make -j$(nproc --all) O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=${PWD}/clang/bin/arm-linux-gnueabi- CONFIG_NO_ERROR_ON_MISMATCH=y 2>&1 | tee error.log - Image.gz dtbo.img
 
 kernel="out/arch/arm64/boot/Image.gz"
 dtb="out/arch/arm64/boot/dts/qcom/sm8150-v2.dtb"
