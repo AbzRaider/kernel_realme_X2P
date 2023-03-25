@@ -47,7 +47,6 @@ if [ -f "$kernel" ] && [ -f "$dtb" ] && [ -f "$dtbo" ]; then
 	cp $dtb AnyKernel_RMX3/dtb
 	rm -f *zip
 	cd AnyKernel_RMX3 || exit
-	rm -rf out/arch/arm64/boot
 	zip -r9 "../$ZIPNAME" * -x .git README.md *placeholder
 	cd ..
 	rm -rf AnyKernel_RMX3
