@@ -12,7 +12,7 @@ export KBUILD_BUILD_HOST=MARKxDEVS
 export KBUILD_BUILD_USER="AbzRaider"
 export kernel="out/arch/arm64/boot/Image.gz"
 export dtb="out/arch/arm64/boot/dts/qcom/sm8150-v2.dtb"
-export dtbo="out/arch/arm64/boot/dtbo.img
+export dtbo="out/arch/arm64/boot/dtbo.img"
 git clone --depth=1 https://gitlab.com/LeCmnGend/proton-clang.git clang
 
 if ! [ -d "out" ]; then
@@ -28,7 +28,7 @@ else
 	
 fi
 
-make O=out ARCH=arm64 RMX2151_defconfig
+make O=out ARCH=arm64 RMX1931_defconfig
 
 PATH="${PWD}/clang/bin:${PATH}:${PWD}/clang/bin:${PATH}:${PWD}/clang/bin:${PATH}" \
 make -j$(nproc --all) O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- CONFIG_NO_ERROR_ON_MISMATCH=y 2>&1 | tee error.log - Image.gz dtbo.img
@@ -42,7 +42,7 @@ if  [ -d "AnyKernel" ]; then
 fi
 export kernel="out/arch/arm64/boot/Image.gz"
 export dtb="out/arch/arm64/boot/dts/qcom/sm8150-v2.dtb"
-export dtbo="out/arch/arm64/boot/dtbo.img
+export dtbo="out/arch/arm64/boot/dtbo.img"
 git clone --depth=1 https://github.com/AbzRaider/AnyKernel_RMX3.git -b x2PRO AnyKernel
 cp $kernel $dtbo AnyKernel
 cp $dtb AnyKernel/dtb
