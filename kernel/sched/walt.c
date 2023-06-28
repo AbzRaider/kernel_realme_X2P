@@ -2228,32 +2228,29 @@ void mark_task_starting(struct task_struct *p)
 }
 
 #define pct_to_min_scaled(tunable) \
-		div64_u64(((u64)sched_ravg_window * tunable *		\
-			 topology_get_cpu_scale(NULL,			\
-			 cluster_first_cpu(sched_cluster[0]))),	\
-			 ((u64)SCHED_CAPACITY_SCALE * 100))
+		div64_u64(((u64)sched_ravg_window * tunable) << 10, \
+			   (u64)sched_cluster[0]->load_scale_factor)
 
 static inline void walt_update_group_thresholds(void)
 {
-	sched_group_upmigrate =
-			pct_to_min_scaled(sysctl_sched_group_upmigrate_pct);
-	sched_group_downmigrate =
-			pct_to_min_scaled(sysctl_sched_group_downmigrate_pct);
+	switch (kp_active_mode()) {
+	case 3:
+		sched_group_upmigrate = pct_to_min_scaled(90);
+		sched_group_downmigrate = pct_to_min_scaled(70);
+		break;
+	case 1:
+		sched_group_upmigrate = pct_to_min_scaled(115);
+		sched_group_downmigrate = pct_to_min_scaled(100);
+		break;
+	default:
+		sched_group_upmigrate = pct_to_min_scaled(95);
+		sched_group_downmigrate = pct_to_min_scaled(85);
+		break;
+	}
 }
 
-static void walt_cpus_capacity_changed(const cpumask_t *cpus)
-{
-	unsigned long flags;
-
-	acquire_rq_locks_irqsave(cpu_possible_mask, &flags);
-
-	if (cpumask_intersects(cpus, &sched_cluster[0]->cpus))
-		walt_update_group_thresholds();
-
-	release_rq_locks_irqrestore(cpu_possible_mask, &flags);
-}
-
-
+static cpumask_t all_cluster_cpus = CPU_MASK_NONE;
+DECLARE_BITMAP(all_cluster_ids, NR_CPUS);
 struct sched_cluster *sched_cluster[NR_CPUS];
 static int num_sched_clusters;
 
